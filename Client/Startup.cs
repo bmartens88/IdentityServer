@@ -1,13 +1,20 @@
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
+using IdentityModel;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.Net.Http.Headers;
 
 namespace Client
 {
@@ -16,6 +23,7 @@ namespace Client
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
         }
 
         public IConfiguration Configuration { get; }
@@ -24,6 +32,45 @@ namespace Client
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
+
+            services.AddHttpClient("IDPClient", client =>
+            {
+                client.BaseAddress = new Uri("https://localhost:5005");
+                client.DefaultRequestHeaders.Clear();
+                client.DefaultRequestHeaders.Add(HeaderNames.Accept, "application/json");
+            });
+
+            services.AddHttpClient("APIClient", client =>
+            {
+                client.BaseAddress = new Uri("https://localhost:5001/");
+                client.DefaultRequestHeaders.Clear();
+                client.DefaultRequestHeaders.Add(HeaderNames.Accept, "application/json");
+            });
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+            }).AddCookie(CookieAuthenticationDefaults.AuthenticationScheme,
+                options => { options.AccessDeniedPath = "/Auth/AccessDenied"; }).AddOpenIdConnect(
+                OpenIdConnectDefaults.AuthenticationScheme, options =>
+                {
+                    options.Authority = "https://localhost:5005";
+                    options.ClientId = "weatherforecastclient";
+                    options.ClientSecret = "WeatherForecastClientSecret";
+                    options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.ResponseType = OpenIdConnectResponseType.Code;
+                    options.SaveTokens = true;
+                    options.UsePkce = true;
+                    options.GetClaimsFromUserInfoEndpoint = true;
+
+                    // Deleting some claims
+                    options.ClaimActions.DeleteClaims("idp", "sid");
+                    
+                    // Adding Address scope
+                    options.Scope.Add("address");
+                    options.Scope.Add("roles");
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
