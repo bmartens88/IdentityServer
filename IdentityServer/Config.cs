@@ -30,7 +30,7 @@ namespace IdentityServer
                     ClientId = "weatherforecastclient",
                     ClientSecrets =
                     {
-                        new Secret("WeatherForecastClientSecret".Sha256())
+                        new Secret("WeatherForecastClientSecret".Sha512())
                     },
                     AllowedGrantTypes = GrantTypes.Code,
                     RequirePkce = true,
@@ -40,6 +40,10 @@ namespace IdentityServer
                         IdentityServerConstants.StandardScopes.Profile,
                         IdentityServerConstants.StandardScopes.Address,
                         "roles"
+                    },
+                    RedirectUris =
+                    {
+                        "https://localhost:5010/signin-oidc"
                     }
                 }
             };

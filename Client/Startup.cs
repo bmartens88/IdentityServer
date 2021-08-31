@@ -61,7 +61,7 @@ namespace Client
                     options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                     options.ResponseType = OpenIdConnectResponseType.Code;
                     options.SaveTokens = true;
-                    options.UsePkce = true;
+                    // options.UsePkce = true;
                     options.GetClaimsFromUserInfoEndpoint = true;
 
                     // Deleting some claims
@@ -92,6 +92,7 @@ namespace Client
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
