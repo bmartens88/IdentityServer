@@ -88,6 +88,7 @@ namespace Client
                     options.Scope.Add("roles");
                     options.Scope.Add("weatherforecastapi");
                     options.Scope.Add("country");
+                    options.Scope.Add("offline_access");
 
                     options.ClaimActions.MapUniqueJsonKey("role", "role");
                     options.ClaimActions.MapUniqueJsonKey("country", "country");

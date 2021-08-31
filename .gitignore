@@ -457,3 +457,4 @@ $RECYCLE.BIN/
 ## Identity Server dev credential
 ##
 *.jwk
+*.db

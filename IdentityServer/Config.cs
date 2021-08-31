@@ -23,6 +23,18 @@ namespace IdentityServer
             new[]
             {
                 new ApiResource("weatherforecastapi", "Weather Forecast API")
+                {
+                    Scopes =
+                    {
+                        "weatherforecastapi"
+                    }
+                }
+            };
+
+        public static IEnumerable<ApiScope> Scopes =>
+            new[]
+            {
+                new ApiScope("weatherforecastapi", "Weather Forecast API")
             };
 
         public static IEnumerable<Client> Clients =>
@@ -32,6 +44,9 @@ namespace IdentityServer
                 {
                     ClientName = "WeatherForecastClient",
                     ClientId = "weatherforecastclient",
+                    AccessTokenLifetime = 120,
+                    AllowOfflineAccess = true,
+                    UpdateAccessTokenClaimsOnRefresh = true,
                     ClientSecrets =
                     {
                         new Secret("WeatherForecastClientSecret".Sha512())
