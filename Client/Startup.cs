@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
+using Client.Handlers;
 using IdentityModel;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -34,6 +35,10 @@ namespace Client
         {
             services.AddControllersWithViews();
 
+            // HTTPContextAccessor and handler(s)
+            services.AddHttpContextAccessor();
+            services.AddTransient<BearerTokenHandler>();
+
             services.AddHttpClient("IDPClient", client =>
             {
                 client.BaseAddress = new Uri("https://localhost:5005");
@@ -46,7 +51,7 @@ namespace Client
                 client.BaseAddress = new Uri("https://localhost:5001/");
                 client.DefaultRequestHeaders.Clear();
                 client.DefaultRequestHeaders.Add(HeaderNames.Accept, "application/json");
-            });
+            }).AddHttpMessageHandler<BearerTokenHandler>();
 
             services.AddAuthentication(options =>
             {
@@ -71,6 +76,7 @@ namespace Client
                     // Adding Address scope
                     options.Scope.Add("address");
                     options.Scope.Add("roles");
+                    options.Scope.Add("weatherforecastapi");
 
                     options.ClaimActions.MapUniqueJsonKey("role", "role");
 

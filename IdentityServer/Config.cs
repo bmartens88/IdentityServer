@@ -19,7 +19,10 @@ namespace IdentityServer
             };
 
         public static IEnumerable<ApiResource> ApiResources =>
-            Array.Empty<ApiResource>();
+            new[]
+            {
+                new ApiResource("weatherforecastapi", "Weather Forecast API")
+            };
 
         public static IEnumerable<Client> Clients =>
             new Client[]
@@ -39,7 +42,8 @@ namespace IdentityServer
                         IdentityServerConstants.StandardScopes.OpenId,
                         IdentityServerConstants.StandardScopes.Profile,
                         IdentityServerConstants.StandardScopes.Address,
-                        "roles"
+                        "roles",
+                        "weatherforecastapi"
                     },
                     RedirectUris =
                     {
