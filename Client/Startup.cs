@@ -14,6 +14,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 
 namespace Client
@@ -66,10 +67,17 @@ namespace Client
 
                     // Deleting some claims
                     options.ClaimActions.DeleteClaims("idp", "sid");
-                    
+
                     // Adding Address scope
                     options.Scope.Add("address");
                     options.Scope.Add("roles");
+
+                    options.ClaimActions.MapUniqueJsonKey("role", "role");
+
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        RoleClaimType = JwtClaimTypes.Role
+                    };
                 });
         }
 

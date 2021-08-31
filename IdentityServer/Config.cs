@@ -44,6 +44,10 @@ namespace IdentityServer
                     RedirectUris =
                     {
                         "https://localhost:5010/signin-oidc"
+                    },
+                    PostLogoutRedirectUris =
+                    {
+                        "https://localhost:5010/signout-callback-oidc"
                     }
                 }
             };

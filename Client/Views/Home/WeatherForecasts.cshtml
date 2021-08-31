@@ -1,0 +1,52 @@
+﻿@model IEnumerable<WeatherForecast>
+
+@{
+    ViewData["Title"] = "Weather Forecasts";
+}
+
+<h1>Weather Forecasts</h1>
+
+@if (User.IsInRole("Administrator"))
+{
+    <p>
+        <a asp-action="Create">Create New</a>
+    </p>
+}
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>@Html.DisplayNameFor(model => model.Date)</th>
+        <th>@Html.DisplayNameFor(model => model.TemperatureC)</th>
+        <th>@Html.DisplayNameFor(model => model.TemperatureF)</th>
+        <th>@Html.DisplayNameFor(model => model.Summary)</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(_ => item.Date)
+            </td>
+            <td>
+                @Html.DisplayFor(_ => item.TemperatureC)
+            </td>
+            <td>
+                @Html.DisplayFor(_ => item.TemperatureF)
+            </td>
+            <td>
+                @Html.DisplayFor(_ => item.Summary)
+            </td>
+            @if (User.IsInRole("Administrator"))
+            {
+                <td>
+                    @Html.ActionLink("Edit", "Edit", new {}) |
+                    @Html.ActionLink("Details", "Details", new {}) |
+                    @Html.ActionLink("Delete", "Delete", new {})
+                </td>
+            }
+        </tr>
+    }
+    </tbody>
+</table>
