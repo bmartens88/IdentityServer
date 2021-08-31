@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Text.Json;
@@ -32,18 +33,31 @@ namespace Client.Controllers
             return View();
         }
 
+        [Authorize]
         public async Task<IActionResult> WeatherForecasts()
         {
             var client = _httpClientFactory.CreateClient("APIClient");
             var response = await client.GetAsync("WeatherForecast");
-            response.EnsureSuccessStatusCode();
-            var weatherForecastString = await response.Content.ReadAsStringAsync();
-            var weatherForecasts = JsonSerializer.Deserialize<List<WeatherForecast>>(weatherForecastString,
-                new JsonSerializerOptions {PropertyNameCaseInsensitive = true});
-            return View(weatherForecasts);
+
+            if (response.IsSuccessStatusCode)
+            {
+                response.EnsureSuccessStatusCode();
+                var weatherForecastString = await response.Content.ReadAsStringAsync();
+                var weatherForecasts = JsonSerializer.Deserialize<List<WeatherForecast>>(weatherForecastString,
+                    new JsonSerializerOptions {PropertyNameCaseInsensitive = true});
+                return View(weatherForecasts);
+            }
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized ||
+                response.StatusCode == HttpStatusCode.Forbidden)
+            {
+                return RedirectToAction("AccessDenied", "Auth");
+            }
+
+            throw new Exception("There is a problem accessing the API.");
         }
 
-        [Authorize(Roles = "Administrator")]
+        [Authorize(Policy = "CanCreateAndModifyData")]
         public async Task<IActionResult> Privacy()
         {
             var idpClient = _httpClientFactory.CreateClient("IDPClient");

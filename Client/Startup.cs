@@ -33,6 +33,16 @@ namespace Client
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("CanCreateAndModifyData", builder =>
+                {
+                    builder.RequireAuthenticatedUser();
+                    builder.RequireRole("role", "Administrator");
+                    builder.RequireClaim("country", "USA");
+                });
+            });
+
             services.AddControllersWithViews();
 
             // HTTPContextAccessor and handler(s)
@@ -77,8 +87,10 @@ namespace Client
                     options.Scope.Add("address");
                     options.Scope.Add("roles");
                     options.Scope.Add("weatherforecastapi");
+                    options.Scope.Add("country");
 
                     options.ClaimActions.MapUniqueJsonKey("role", "role");
+                    options.ClaimActions.MapUniqueJsonKey("country", "country");
 
                     options.TokenValidationParameters = new TokenValidationParameters
                     {

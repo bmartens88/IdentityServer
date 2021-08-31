@@ -1,4 +1,6 @@
-﻿@model IEnumerable<WeatherForecast>
+﻿@using Microsoft.AspNetCore.Authorization
+@model IEnumerable<WeatherForecast>
+@inject IAuthorizationService AuthorizationService
 
 @{
     ViewData["Title"] = "Weather Forecasts";
@@ -6,7 +8,7 @@
 
 <h1>Weather Forecasts</h1>
 
-@if (User.IsInRole("Administrator"))
+@if ((await AuthorizationService.AuthorizeAsync(User, "CanCreateAndModifyData")).Succeeded)
 {
     <p>
         <a asp-action="Create">Create New</a>
@@ -38,7 +40,7 @@
             <td>
                 @Html.DisplayFor(_ => item.Summary)
             </td>
-            @if (User.IsInRole("Administrator"))
+            @if ((await AuthorizationService.AuthorizeAsync(User, "CanCreateAndModifyData")).Succeeded)
             {
                 <td>
                     @Html.ActionLink("Edit", "Edit", new {}) |
