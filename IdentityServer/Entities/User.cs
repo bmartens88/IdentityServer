@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using IdentityServer.Entities.ViewModels;
+using IdentityServer.Mapping;
+using Microsoft.AspNetCore.Identity;
 
 namespace IdentityServer.Entities
 {

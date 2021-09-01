@@ -16,8 +16,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using AutoMapper;
 using IdentityServer.Entities;
+using IdentityServer.Entities.ViewModels;
 using Microsoft.AspNetCore.Identity;
 
 namespace IdentityServerHost.Quickstart.UI
@@ -37,6 +40,7 @@ namespace IdentityServerHost.Quickstart.UI
         private readonly IEventService _events;
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
+        private readonly IMapper _mapper;
 
         public AccountController(
             IIdentityServerInteractionService interaction,
@@ -44,7 +48,8 @@ namespace IdentityServerHost.Quickstart.UI
             IAuthenticationSchemeProvider schemeProvider,
             IEventService events,
             UserManager<User> userManager,
-            SignInManager<User> signInManager)
+            SignInManager<User> signInManager,
+            IMapper mapper)
         {
             _interaction = interaction;
             _clientStore = clientStore;
@@ -52,6 +57,7 @@ namespace IdentityServerHost.Quickstart.UI
             _events = events;
             _userManager = userManager;
             _signInManager = signInManager;
+            _mapper = mapper;
         }
 
         /// <summary>
@@ -402,6 +408,48 @@ namespace IdentityServerHost.Quickstart.UI
             }
 
             return vm;
+        }
+
+        // Custom logic for user registration
+        [HttpGet]
+        public IActionResult Register(string returnUrl)
+        {
+            ViewData["ReturnUrl"] = returnUrl;
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(UserRegistrationModel userModel, string returnUrl)
+        {
+            if (!ModelState.IsValid)
+                return View(userModel);
+
+            var user = _mapper.Map<User>(userModel);
+
+            var result = await _userManager.CreateAsync(user, userModel.Password);
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.TryAddModelError(error.Code, error.Description);
+                }
+
+                return View(userModel);
+            }
+
+            await _userManager.AddToRoleAsync(user, "Visitor");
+
+            await _userManager.AddClaimsAsync(user, new[]
+            {
+                new Claim(JwtClaimTypes.GivenName, user.FirstName),
+                new Claim(JwtClaimTypes.FamilyName, user.LastName),
+                new Claim(JwtClaimTypes.Role, "Visitor"),
+                new Claim(JwtClaimTypes.Address, user.Address),
+                new Claim("country", user.Country)
+            });
+            
+            return Redirect(returnUrl);
         }
     }
 }

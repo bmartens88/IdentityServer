@@ -28,6 +28,9 @@ namespace IdentityServer
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            // AutoMapper
+            services.AddAutoMapper(typeof(Startup));
+
             services.AddControllersWithViews();
 
             // EF Core Setup
@@ -37,7 +40,12 @@ namespace IdentityServer
             services.AddDbContext<UserContext>(options =>
                 options.UseSqlite(_configuration.GetConnectionString("identitySqlConnection")));
 
-            services.AddIdentity<User, IdentityRole>()
+            services.AddIdentity<User, IdentityRole>(opt =>
+                {
+                    opt.Password.RequireDigit = false;
+                    opt.Password.RequiredLength = 7;
+                    opt.Password.RequireUppercase = false;
+                })
                 .AddEntityFrameworkStores<UserContext>()
                 .AddDefaultTokenProviders();
 
